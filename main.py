@@ -1,4 +1,5 @@
 import pygame
+from tile import Tile
 
 
 class Game:
@@ -8,6 +9,8 @@ class Game:
         self.screenSize = self.screen.get_size()
         self.clock = pygame.time.Clock()
         self.Running = True
+        self.template = pygame.image.load("test_image.png")
+        self.tile = Tile(self.template,3,3,(100,100))
 
     def run(self):
         while self.Running:
