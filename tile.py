@@ -31,10 +31,12 @@ class Slot:
         self.size: tuple[int,int] = size
         self.possibilities:list[Tile] = []
         self.screen = pygame.display.get_surface()
+        self.screen_size = self.screen.get_size()
         self.tile: Tile
         self.collapsed = False
         self.entropy = self.size[0]*self.size[1]
         self.template = pygame.image.load("test_image.png")
+        self.pixel = None
 
         for i in range(self.size[0]):
             for j in range(self.size[1]):
@@ -42,8 +44,8 @@ class Slot:
 
     def draw(self):
         if self.collapsed:
-            self.tile.image = pygame.transform.scale(self.tile.image, (self.scale, self.scale))
-            self.screen.blit(self.tile.image, self.pos,(100*self.tile.stepx,100*self.tile.stepy,100,100),)
+            self.tile.image = pygame.transform.scale(self.template, (216, 216))
+            self.screen.blit(self.tile.image, self.pos,(54*self.tile.stepx,54*self.tile.stepy,54,54),)
             
         
     def collapse(self):
