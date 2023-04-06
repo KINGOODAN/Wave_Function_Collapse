@@ -3,6 +3,8 @@ import random
 import copy
 import numpy as np
 
+
+
 class Tile:
     def __init__(self, image:pygame.surface.Surface, stepx:int, stepy:int, size:tuple[int,int]):
         self.image = image
@@ -19,8 +21,8 @@ class Tile:
         ]
         for i in range(4):
             self.sides.append(image.unmap_rgb(self.pixel[self.check_positions[i]])) #type: ignore
-            print(image.unmap_rgb(self.pixel[self.check_positions[i]]),end=", ") #type: ignore
-            print(self.check_positions[i])
+            #print(image.unmap_rgb(self.pixel[self.check_positions[i]]),end=", ") #type: ignore
+            #print(self.check_positions[i])
 
 class Slot:
     def __init__(self, pos: tuple[int,int], scale: int, size: tuple[int,int]): #scale is the multiplier the size is how many tile x then y
@@ -32,18 +34,28 @@ class Slot:
         self.tile: Tile
         self.collapsed = False
         self.entropy = self.size[0]*self.size[1]
+        self.template = pygame.image.load("test_image.png")
+
+        for i in range(self.size[0]):
+            for j in range(self.size[1]):
+                self.possibilities.append(Tile(self.template,i,j,(100,100))) 
 
     def draw(self):
         if self.collapsed:
             self.tile.image = pygame.transform.scale(self.tile.image, (self.scale, self.scale))
-            self.screen.blit(self.tile.image, self.pos)
+            self.screen.blit(self.tile.image, self.pos,(100*self.tile.stepx,100*self.tile.stepy,100,100),)
+            
         
     def collapse(self):
+        #print("test")
         if len(self.possibilities) != 0:
+            print("______test")
             self.collapsed = True
             randomSlot = random.randint(0,len(self.possibilities)-1)
             self.tile = self.possibilities[randomSlot]
-            return
+            
+        
+
 
 def determine_possibilities(grid:list[list[Slot]]):
     filter = []
@@ -51,7 +63,7 @@ def determine_possibilities(grid:list[list[Slot]]):
     for i,rows in enumerate(grid):
         for j,t in enumerate(rows):
             if t.collapsed == False:
-                filter = copy.deepcopy(t.possibilities)
+                filter = copy.copy(t.possibilities)
                 isDone = False
                 if j+1 < len(grid[i]):
                     if grid[i][j+1].collapsed:
@@ -73,7 +85,7 @@ def determine_possibilities(grid:list[list[Slot]]):
                         for possibility in t.possibilities:
                             if grid[i-1][j].tile.sides[2] != possibility.sides[0]:
                                 filter.remove(possibility)
-            t.possibilities = copy.deepcopy(filter)
+            t.possibilities = copy.copy(filter)
             t.entropy = len(t.possibilities)
     return isDone, grid
 
@@ -90,13 +102,15 @@ def collapse(size:tuple[int,int], grid:list[list[Slot]]):
             if s.collapsed == False:
                 if s.entropy == lowestEntropy:
                     lowestList.append(s)
+
     if len(lowestList) != 0:
         randomSlot = random.randint(0,len(lowestList)-1)
         lowestList[randomSlot].collapse()
-        return grid
+    return grid
 
-def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]], done:bool):
-    done = False
+
+
+def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]]):
     grid = []
     scale = 54
     for i in range(int(screen.get_height()/scale)):

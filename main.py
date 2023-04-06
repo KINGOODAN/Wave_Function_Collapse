@@ -1,5 +1,5 @@
 import pygame
-from tile import *
+from tile import Tile, Slot, makeGrid, determine_possibilities, collapse
 
 
 class Game:
@@ -9,15 +9,12 @@ class Game:
         self.screenSize = self.screen.get_size()
         self.clock = pygame.time.Clock()
         self.Running = True
-        self.template = pygame.image.load("test_image.png")
-        self.tile = Tile(self.template,3,3,(100,100))
-        self.grid:list[list[Slot]]
-        self.done:bool
+        self.grid:list[list[Slot]] = []
+        self.done:bool = False
 
     def run(self):
         
-        makeGrid(self.screen, self.grid, self.done)
-
+        self.grid = makeGrid(self.screen, self.grid)
         while self.Running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -26,13 +23,13 @@ class Game:
             if keys[pygame.K_LCTRL]:
                 self.Running = False
             if keys[pygame.K_LSHIFT]:
-                makeGrid(self.screen, self.grid, self.done)
+                self.grid = makeGrid(self.screen, self.grid)
 
             self.screen.fill((0,0,0))
 
-            if not done: #type: ignore
-                done = determine_possibilities(self.grid)
-                collapse((4,4), self.grid)
+            if not self.done: #type: ignore
+                self.done,self.grid = determine_possibilities(self.grid)
+                self.grid = collapse((4,4), self.grid)
 
             scale = 54
             for i in range(int(self.screen.get_height()/scale)):
