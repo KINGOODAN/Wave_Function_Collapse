@@ -8,7 +8,8 @@ class Tile:
         self.stepx = stepx
         self.stepy = stepy
         self.size = size
-        self.image = pygame.image.load(f"images/test_image_{stepy*size}_{stepx*size}.png")
+        self.name = (f"images/test_image_{stepy*size}_{stepx*size}.png")
+        self.image = pygame.image.load(self.name)
         self.sides:list[list[tuple[int,int,int,int]]] = []
         self.pixel = pygame.PixelArray(self.image)
 
@@ -18,11 +19,11 @@ class Tile:
                 if i == 0:
                     self.sides[i].append(self.image.unmap_rgb(self.pixel[j][0])) #type: ignore
                 if i == 1:
-                    self.sides[i].append(self.image.unmap_rgb(self.pixel[j][99])) #type: ignore
-                if i == 2:
-                    self.sides[i].append(self.image.unmap_rgb(self.pixel[0][j])) #type: ignore
-                if i == 3:
                     self.sides[i].append(self.image.unmap_rgb(self.pixel[99][j])) #type: ignore
+                if i == 2:
+                    self.sides[i].append(self.image.unmap_rgb(self.pixel[j][99])) #type: ignore
+                if i == 3:
+                    self.sides[i].append(self.image.unmap_rgb(self.pixel[0][j])) #type: ignore
 
         self.pixel.close()
 
@@ -67,30 +68,38 @@ def determine_possibilities(grid:list[list[Slot]]):
             if space.collapsed == False:
                 filter = copy.copy(space.possibilities)
                 isDone = False
-                print("test")
                 if j+1 < len(grid[i]):
-                    print("test__1")
                     if grid[i][j+1].collapsed:
-                        print("test____2")
                         for possibility in space.possibilities:
                             if grid[i][j+1].tile.sides[3] != possibility.sides[1]:
-                                print("test______3")
+                                #print(grid[i][j+1].tile.name, "LEFT DOES NOT MATCH", possibility.name, "RIGHT")
                                 filter.remove(possibility)
+                            #else:
+                                #print(grid[i][j+1].tile.name, "LEFT MATCHES", possibility.name, "RIGHT")
                 if j-1 >= 0:
                     if grid[i][j-1].collapsed:
                         for possibility in space.possibilities:
                             if grid[i][j-1].tile.sides[1] != possibility.sides[3]:
+                                #print(grid[i][j-1].tile.name, "RIGHT DOES NOT MATCH", possibility.name, "LEFT")
                                 filter.remove(possibility)
+                            #else:
+                                #print(grid[i][j-1].tile.name, "RIGHT MATCHES", possibility.name, "LEFT")
                 if i+1 < len(grid):
                     if grid[i+1][j].collapsed:
                         for possibility in space.possibilities:
                             if grid[i+1][j].tile.sides[0] != possibility.sides[2]:
+                                #print(grid[i+1][j].tile.name, "TOP DOES NOT MATCH", possibility.name, "BOTTOM")
                                 filter.remove(possibility)
+                            #else:
+                                #print(grid[i+1][j].tile.name, "TOP MATCHES", possibility.name, "BOTTOM")
                 if i-1 >= 0:
                     if grid[i-1][j].collapsed:
                         for possibility in space.possibilities:
                             if grid[i-1][j].tile.sides[2] != possibility.sides[0]:
+                                #print(grid[i-1][j].tile.name, "BOTTOM DOES NOT MATCH", possibility.name, "TOP")
                                 filter.remove(possibility)
+                            #else:
+                                #print(grid[i-1][j].tile.name, "BOTTOM MATCHES", possibility.name, "TOP")
             space.possibilities = copy.copy(filter)
             space.entropy = len(space.possibilities)
     return isDone, grid
