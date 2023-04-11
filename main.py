@@ -91,12 +91,5 @@ class Main:
             if not present:
                 temp.append(tile)
 
-        # pixels.append(self.possibilities[0].sides) 
-        # temp.append(self.possibilities[0])
-        # for tile in self.possibilities:
-        #     if tile.sides not in pixels:
-        #         pixels.append(tile.sides)
-        #         temp.append(tile)
-
         self.possibilities = copy.copy(temp)
         print(len(self.possibilities))
