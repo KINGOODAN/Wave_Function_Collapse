@@ -19,9 +19,9 @@ class Tile:
                 if i == 0:
                     self.sides[i].append(self.image.unmap_rgb(self.pixel[j][0])) #type: ignore
                 if i == 1:
-                    self.sides[i].append(self.image.unmap_rgb(self.pixel[99][j])) #type: ignore
+                    self.sides[i].append(self.image.unmap_rgb(self.pixel[self.size-1][j])) #type: ignore
                 if i == 2:
-                    self.sides[i].append(self.image.unmap_rgb(self.pixel[j][99])) #type: ignore
+                    self.sides[i].append(self.image.unmap_rgb(self.pixel[j][self.size-1])) #type: ignore
                 if i == 3:
                     self.sides[i].append(self.image.unmap_rgb(self.pixel[0][j])) #type: ignore
 
@@ -29,23 +29,18 @@ class Tile:
 
 
 class Slot:
-    def __init__(self, pos: tuple[int,int], scale: int, size:int): #scale is the multiplier the size is how many tile x then y
+    def __init__(self, pos: tuple[int,int], size:int, tile_size:int, base_tile_size:int, possibilities:list[Tile]): #scale is the multiplier the size is how many tile x then y
         self.pos: tuple[int,int] = pos
-        self.scale: int = scale
         self.size: int = size
-        self.possibilities:list[Tile] = []
+        self.possibilities:list[Tile] = possibilities
         self.screen = pygame.display.get_surface()
         self.screen_size = self.screen.get_size()
         self.tile: Tile
         self.collapsed = False
         self.entropy = self.size*self.size
         self.template = pygame.image.load("test_image.png")
-        self.base_tile_size:int = 100
-        self.tile_size:int = 120
-
-        for i in range(self.size):
-            for j in range(self.size):
-                self.possibilities.append(Tile(i,j,self.base_tile_size)) 
+        self.base_tile_size:int = base_tile_size
+        self.tile_size:int = tile_size
 
     def draw(self):
         if self.collapsed:
@@ -125,13 +120,13 @@ def collapse(size:int, grid:list[list[Slot]]):
     return grid
 
 
-def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]], tile_size:int, img_tile_dimentions):
+def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]], img_tile_dimentions, tile_size:int, base_tile_size:int, possibilities:list[Tile]):
     grid = []
     for i in range(int(screen.get_height()/tile_size)):
         grid.append([])
         for j in range(int(screen.get_width()/tile_size)):
-            grid[i].append(Slot((j*tile_size,i*tile_size), tile_size, img_tile_dimentions))
-    return grid
+            grid[i].append(Slot((j*tile_size,i*tile_size), img_tile_dimentions, tile_size, base_tile_size, possibilities))
+    return grid, False
 
 
 
