@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 from tile import *
 from PIL import Image
 from itertools import product
@@ -14,21 +15,40 @@ class Main:
         self.Running = True
         self.grid:list[list[Slot]] = []
         self.done:bool = False
-        self.image = "test_image.png"
-        self.image_size:int = 400
-        self.base_tile_size = 50
+        self.image = "wires_test.png"
+        self.image_dir = "images/"
+        self.image_size:int = 56
+        self.base_tile_size = 14
         self.possable_tile_sizes = {"A":120,"B":60,"C":40,"D":30,"E":24,"F":20}
         self.tile_size:int = 120
         self.img_tile_dimentions:int = int(self.image_size/self.base_tile_size)
         self.possibilities:list[Tile] = [] 
 
     def run(self):
-        choice = (input("Which tile size would you like?\nA:120\nB:60\nC:40\nD:30\nE:24\nF:20\n -- ")).upper()
-        if choice in self.possable_tile_sizes:
-            self.tile_size = self.possable_tile_sizes[choice]
-        self.slice(self.image, ".", "images/", self.base_tile_size)
+        while True:
+            event = pygame.event.wait()
+            if event.type == KEYDOWN:
+                if event.key == K_1:
+                    self.tile_size = self.possable_tile_sizes["A"]
+                    break
+                elif event.key == K_2:
+                    self.tile_size = self.possable_tile_sizes["B"]
+                    break
+                elif event.key == K_3:
+                    self.tile_size = self.possable_tile_sizes["C"]
+                    break
+                elif event.key == K_4:
+                    self.tile_size = self.possable_tile_sizes["D"]
+                    break
+                elif event.key == K_5:
+                    self.tile_size = self.possable_tile_sizes["E"]
+                    break
+                elif event.key == K_6:
+                    self.tile_size = self.possable_tile_sizes["F"]
+                    break
+        self.slice(self.image, self.image_dir, self.image_dir, self.base_tile_size)
         self.make_possibilities()
-        self.grid, self.done = makeGrid(self.screen, self.grid, self.img_tile_dimentions, self.tile_size, self.base_tile_size, self.possibilities)
+        self.grid, self.done = makeGrid(self.screen, self.grid, self.img_tile_dimentions, self.tile_size, self.base_tile_size, self.possibilities, self.image)
         while self.Running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -37,13 +57,13 @@ class Main:
             if keys[pygame.K_LCTRL]:
                 self.Running = False
             if keys[pygame.K_LSHIFT]:
-                self.grid, self.done = makeGrid(self.screen, self.grid, self.img_tile_dimentions, self.tile_size, self.base_tile_size, self.possibilities)
+                self.grid, self.done = makeGrid(self.screen, self.grid, self.img_tile_dimentions, self.tile_size, self.base_tile_size, self.possibilities, self.image)
 
             self.screen.fill((0,0,0))
 
             if not self.done: #type: ignore
                 self.done,self.grid = determine_possibilities(self.grid)
-                self.grid = collapse(self.img_tile_dimentions, self.grid)
+                self.grid = collapse(self.grid, len(self.possibilities))
 
             for i in range(int(self.screen.get_height()/self.tile_size)):
                 for j in range(int(self.screen.get_width()/self.tile_size)):
@@ -60,36 +80,40 @@ class Main:
         grid = product(range(0, h-h%d, d), range(0, w-w%d, d))
         for i, j in grid:
             box = (j, i, j+d, i+d)
-            out = os.path.join(dir_out, f'{name}_{i}_{j}{ext}')
-            img.crop(box).save(out)
+            for k in range(4):
+                out = os.path.join(dir_out, f'{name}_{i}_{j}_{90*k}{ext}')
+                img.crop(box).rotate(90*k).save(out)
+
+        
+
     
     def clear_folder(self):
-        folder = "images/"
+        folder = self.image_dir
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
             try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
+                if filename == self.image:
+                    pass
+                elif os.path.isfile(file_path) or os.path.islink(file_path):
                     os.unlink(file_path)
                 elif os.path.isdir(file_path):
                     shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
+        
 
     def make_possibilities(self):
         temp:list[Tile] = []
-        for i in range(self.img_tile_dimentions):
-            for j in range(self.img_tile_dimentions):
-                self.possibilities.append(Tile(i,j,self.base_tile_size))
-
-        pixels = []
+        for filename in os.listdir(self.image_dir):
+            if filename != self.image:
+                self.possibilities.append(Tile(filename,self.base_tile_size))
 
         for tile in self.possibilities:
             present = False
             for otherTile in temp:
-                if tile.sides == otherTile.sides:
+                if tile.pixel_list == otherTile.pixel_list:
                     present = True
             if not present:
-                temp.append(tile)
+                temp.append(tile) 
 
         self.possibilities = copy.copy(temp)
-        print(len(self.possibilities))
