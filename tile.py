@@ -11,7 +11,7 @@ class Tile:
         self.sides:list[list[tuple[int,int,int,int]]] = []
         self.pixel = pygame.PixelArray(self.image)
         self.pixel_list:list[list[tuple[int,int,int,int]]] = []
-        for i, pix in enumerate(self.pixel):
+        for i, pix in enumerate(self.pixel): #type: ignore
             self.pixel_list.append([])
             for j in pix:
                 self.pixel_list[i].append(self.image.unmap_rgb(j))
@@ -32,15 +32,15 @@ class Tile:
 
 
 class Slot:
-    def __init__(self, pos: tuple[int,int], size:int, tile_size:int, base_tile_size:int, possibilities:list[Tile], image:str): #scale is the multiplier the size is how many tile x then y
+    def __init__(self, pos: tuple[int,int], size:tuple[int,int], tile_size:int, base_tile_size:int, possibilities:list[Tile], image:str): #scale is the multiplier the size is how many tile x then y
         self.pos: tuple[int,int] = pos
-        self.size: int = size
+        self.size: tuple[int,int] = size
         self.possibilities:list[Tile] = possibilities
         self.screen = pygame.display.get_surface()
         self.screen_size = self.screen.get_size()
         self.tile: Tile
         self.collapsed = False
-        self.entropy = self.size*self.size
+        self.entropy = self.size[0]*self.size[1]
         self.template = pygame.image.load(f"images/{image}")
         self.base_tile_size:int = base_tile_size
         self.tile_size:int = tile_size
@@ -106,7 +106,7 @@ def collapse(grid:list[list[Slot]], num_pos:int):
     return grid
 
 
-def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]], img_tile_dimentions, tile_size:int, base_tile_size:int, possibilities:list[Tile],image:str):
+def makeGrid(screen:pygame.surface.Surface, grid:list[list[Slot]], img_tile_dimentions:tuple[int,int], tile_size:int, base_tile_size:int, possibilities:list[Tile],image:str):
     grid = []
     for i in range(int(screen.get_height()/tile_size)):
         grid.append([])
@@ -123,8 +123,8 @@ def check_sides(side1:list[tuple[int,int,int,int]], side2:list[tuple[int,int,int
         for i in range(len(side1)):
             if side1[i] != side2[i]:
                 dif_val += 1
-    check = len(side1)*0.2
-    if dif_val <= check:
+    check = len(side1)*0.15
+    if dif_val < check:
         return True
     return False
 

@@ -1,10 +1,12 @@
 import pygame
-from pygame.locals import *
+from pygame.locals import * #type: ignore
 from tile import *
 from PIL import Image
 from itertools import product
 import os
 import shutil
+
+list_of_input_images = ["test_image.png","wires_test.png","maze1.png"]
 
 class Main:
     def __init__(self):
@@ -15,13 +17,14 @@ class Main:
         self.Running = True
         self.grid:list[list[Slot]] = []
         self.done:bool = False
-        self.image = "wires_test.png"
+        self.image = list_of_input_images[2]
         self.image_dir = "images/"
-        self.image_size:int = 56
-        self.base_tile_size = 14
+        self.img = Image.open(self.image_dir + self.image)
+        self.image_size:tuple[int,int] = self.img.size
+        self.base_tile_size = 100
         self.possable_tile_sizes = {"A":120,"B":60,"C":40,"D":30,"E":24,"F":20}
         self.tile_size:int = 120
-        self.img_tile_dimentions:int = int(self.image_size/self.base_tile_size)
+        self.img_tile_dimentions:tuple[int,int] = (int(self.image_size[0]/self.base_tile_size),int(self.image_size[1]/self.base_tile_size))
         self.possibilities:list[Tile] = [] 
 
     def run(self):
@@ -84,15 +87,13 @@ class Main:
                 out = os.path.join(dir_out, f'{name}_{i}_{j}_{90*k}{ext}')
                 img.crop(box).rotate(90*k).save(out)
 
-        
-
     
     def clear_folder(self):
         folder = self.image_dir
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
             try:
-                if filename == self.image:
+                if filename in list_of_input_images:
                     pass
                 elif os.path.isfile(file_path) or os.path.islink(file_path):
                     os.unlink(file_path)
@@ -105,7 +106,7 @@ class Main:
     def make_possibilities(self):
         temp:list[Tile] = []
         for filename in os.listdir(self.image_dir):
-            if filename != self.image:
+            if filename not in list_of_input_images:
                 self.possibilities.append(Tile(filename,self.base_tile_size))
 
         for tile in self.possibilities:
