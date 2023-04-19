@@ -88,19 +88,20 @@ class Main:
                 img.crop(box).rotate(90*k).save(out)
 
     
-    def clear_folder(self):
+    def clear_folder(self, check_list = []):
         folder = self.image_dir
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
-            try:
-                if filename in list_of_input_images:
-                    pass
-                elif os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+            if filename not in check_list:
+                try:
+                    if filename in list_of_input_images:
+                        pass
+                    elif os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
         
 
     def make_possibilities(self):
@@ -114,7 +115,12 @@ class Main:
             for otherTile in temp:
                 if tile.pixel_list == otherTile.pixel_list:
                     present = True
+
             if not present:
                 temp.append(tile) 
 
         self.possibilities = copy.copy(temp)
+        temp2 = []
+        for i in self.possibilities:
+            temp2.append(i.name)
+        self.clear_folder(temp2)

@@ -67,21 +67,33 @@ def determine_possibilities(grid:list[list[Slot]]):
                 filter = copy.copy(space.possibilities)
                 isDone = False
                 if j+1 < len(grid[i]) and grid[i][j+1].collapsed:
-                    for possibility in space.possibilities:
-                        if not check_sides(grid[i][j+1].tile.sides[3],possibility.sides[1]):
-                            filter.remove(possibility)
+                    if space.entropy == 0:
+                        print("right")
+                    else:
+                        for possibility in space.possibilities:
+                            if not check_sides(grid[i][j+1].tile.sides[3],possibility.sides[1]):
+                                filter.remove(possibility)
                 if j-1 >= 0 and grid[i][j-1].collapsed:
-                    for possibility in space.possibilities:
-                        if not check_sides(grid[i][j-1].tile.sides[1], possibility.sides[3]):
-                            filter.remove(possibility)
+                    if space.entropy == 0:
+                        print("left")
+                    else:
+                        for possibility in space.possibilities:
+                            if not check_sides(grid[i][j-1].tile.sides[1], possibility.sides[3]):
+                                filter.remove(possibility)
                 if i+1 < len(grid) and grid[i+1][j].collapsed:
-                    for possibility in space.possibilities:
-                        if not check_sides(grid[i+1][j].tile.sides[0], possibility.sides[2]):
-                            filter.remove(possibility)
+                    if space.entropy == 0:
+                        print("bottom")
+                    else:
+                        for possibility in space.possibilities:
+                            if not check_sides(grid[i+1][j].tile.sides[0], possibility.sides[2]):
+                                filter.remove(possibility)
                 if i-1 >= 0 and grid[i-1][j].collapsed:
-                    for possibility in space.possibilities:
-                        if not check_sides(grid[i-1][j].tile.sides[2], possibility.sides[0]):
-                            filter.remove(possibility)
+                    if space.entropy == 0:
+                        print("top")
+                    else:
+                        for possibility in space.possibilities:
+                            if not check_sides(grid[i-1][j].tile.sides[2], possibility.sides[0]):
+                                filter.remove(possibility)
             space.possibilities = copy.copy(filter)
             space.entropy = len(space.possibilities)
     return isDone, grid
